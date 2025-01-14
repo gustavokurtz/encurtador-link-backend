@@ -2,10 +2,14 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const shortid = require('shortid');
 const validUrl = require('valid-url');
+const cors = require('cors'); // Importe o pacote cors
+
+
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
+app.use(cors()); // Permite todas as origens
 
 app.post('/encurtar', async (req, res) => {
   const { originalUrl } = req.body;
@@ -58,6 +62,18 @@ app.get('/', async (req, res) => {
 });
 
 
+app.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.url.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(200).json({ message: "URL deletada com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao deletar URL" });
+  }
+});
+
 
 
 
@@ -87,5 +103,5 @@ app.get('/:shortUrl', async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
